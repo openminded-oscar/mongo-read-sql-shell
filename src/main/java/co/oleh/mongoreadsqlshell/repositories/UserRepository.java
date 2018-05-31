@@ -1,4 +1,4 @@
-package co.oleh.mongoreadsqlshell;
+package co.oleh.mongoreadsqlshell.repositories;
 
 import co.oleh.mongoreadsqlshell.entities.User;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -9,14 +9,11 @@ import org.springframework.stereotype.Component;
 import java.util.List;
 
 @Component
-public class CommonMongoRepository {
+public class UserRepository {
     @Autowired
     private MongoTemplate mongoTemplate;
 
-    public void read(){
-        Query query = new Query();
-
-        List<User> users = mongoTemplate.find(query, User.class);
-        System.out.println(users);
+    public List<?> read(Query query){
+        return mongoTemplate.find(query, User.class);
     }
 }

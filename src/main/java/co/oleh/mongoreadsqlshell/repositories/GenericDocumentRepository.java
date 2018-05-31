@@ -6,14 +6,20 @@ import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.stereotype.Component;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Component
-public class UserRepository {
+public class GenericDocumentRepository {
     @Autowired
     private MongoTemplate mongoTemplate;
 
-    public List<?> read(Query query){
-        return mongoTemplate.find(query, User.class);
+    public List<Object> read(Query query, Class clazz){
+        List<Object> objects = new ArrayList<>();
+        mongoTemplate.find(query, clazz)
+                .stream()
+                .forEach(object -> objects.add(object));
+
+        return objects;
     }
 }

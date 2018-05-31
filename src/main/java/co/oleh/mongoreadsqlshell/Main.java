@@ -1,10 +1,9 @@
 package co.oleh.mongoreadsqlshell;
 
 import co.oleh.mongoreadsqlshell.entities.User;
-import co.oleh.mongoreadsqlshell.repositories.UserRepository;
+import co.oleh.mongoreadsqlshell.repositories.GenericDocumentRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
-import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.stereotype.Component;
 
@@ -18,7 +17,7 @@ public class Main implements CommandLineRunner {
     private SqlToMongoQueryTransformer sqlToMongo;
 
     @Autowired
-    private UserRepository userRepository;
+    private GenericDocumentRepository repository;
 
     @Override
     public void run(String... args) throws Exception {
@@ -32,7 +31,7 @@ public class Main implements CommandLineRunner {
 
             if (!isStopPhrase(sqlQuery)) {
                 Query query = sqlToMongo.transform(sqlQuery);
-                List<User> users = (List<User>) userRepository.read(query);
+                List<Object> users = repository.read(query, User.class);
                 System.out.println(users);
             } else {
                 break;

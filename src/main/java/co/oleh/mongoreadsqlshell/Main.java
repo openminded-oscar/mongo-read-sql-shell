@@ -26,8 +26,8 @@ public class Main implements CommandLineRunner {
 
         System.out.println("Welcome to MongoDB alternative (SQL-based) client. Type desired SELECT queries or \"exit\"");
         while (true) {
-            System.out.print("...");
-            sqlQuery = br.readLine();
+            System.out.print("> ");
+            sqlQuery = br.readLine().trim();
 
             if (!isStopPhrase(sqlQuery)) {
                 Query query = sqlToMongo.transform(sqlQuery);

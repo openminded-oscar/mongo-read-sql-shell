@@ -20,10 +20,8 @@ public class SqlToMongoQueryTransformer {
         mongoQuery = setFields(sqlQuery, mongoQuery);
         mongoQuery = setSkipIfPassed(sqlQuery, mongoQuery);
         mongoQuery = setLimitIfPassed(sqlQuery, mongoQuery);
-        // SELECT [FROM <Target>]
-        //[WHERE <Condition>*]
-        //[ORDER BY <Fields>* [ASC|DESC] *]
-
+        mongoQuery = setCondition(sqlQuery, mongoQuery);
+        mongoQuery = setOrdering(sqlQuery, mongoQuery);
 
         return mongoQuery;
     }

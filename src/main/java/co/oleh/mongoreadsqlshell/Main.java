@@ -23,23 +23,28 @@ public class Main implements CommandLineRunner {
     public void run(String... args) throws Exception {
         BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
         String sqlQuery = "";
-
         System.out.println("Welcome to MongoDB alternative (SQL-based) client. Type desired SELECT queries or \"exit\"");
+
         while (true) {
             System.out.print("> ");
-            sqlQuery = br.readLine().trim();
-
-            if (!isStopPhrase(sqlQuery)) {
-                Query query = sqlToMongo.transform(sqlQuery);
-                List<Object> users = repository.read(query, User.class);
-                System.out.println(users);
-            } else {
+            String input = br.readLine().trim();
+            if (isStopPhrase(input)) {
                 break;
+            } else {
+                sqlQuery += " " + input;
+                if (input.trim().charAt(input.length() - 1) == ';') {
+                    sqlQuery = (sqlQuery.substring(0, sqlQuery.length() - 1) + " ;").trim();
+                    System.out.println(sqlQuery);
+                    Query query = sqlToMongo.transform(sqlQuery);
+                    List<Object> users = repository.read(query, User.class);
+                    System.out.println(users);
+                    sqlQuery = "";
+                }
             }
         }
     }
 
-    private boolean isStopPhrase(String sqlQuery){
+    private boolean isStopPhrase(String sqlQuery) {
         return sqlQuery.equalsIgnoreCase("exit");
     }
 }

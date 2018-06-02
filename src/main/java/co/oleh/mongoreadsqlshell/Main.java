@@ -2,6 +2,9 @@ package co.oleh.mongoreadsqlshell;
 
 import co.oleh.mongoreadsqlshell.entities.User;
 import co.oleh.mongoreadsqlshell.repositories.GenericDocumentRepository;
+import net.sf.jsqlparser.parser.CCJSqlParserUtil;
+import net.sf.jsqlparser.statement.select.PlainSelect;
+import net.sf.jsqlparser.statement.select.Select;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.data.mongodb.core.query.Query;
@@ -34,9 +37,11 @@ public class Main implements CommandLineRunner {
                 sqlQuery += " " + input;
                 if (input.trim().charAt(input.length() - 1) == ';') {
                     sqlQuery = (sqlQuery.substring(0, sqlQuery.length() - 1) + " ;").trim();
-                    Query query = sqlToMongo.transform(sqlQuery);
-                    List<Object> users = repository.read(query, User.class);
-                    System.out.println(users);
+                    Select select = (Select) CCJSqlParserUtil.parse(sqlQuery);
+                    PlainSelect plainSelect = (PlainSelect) select.getSelectBody();
+//                    Query query = sqlToMongo.transform(sqlQuery);
+//                    List<Object> users = repository.read(query, User.class);
+//                    System.out.println(users);
                     sqlQuery = "";
                 }
             }

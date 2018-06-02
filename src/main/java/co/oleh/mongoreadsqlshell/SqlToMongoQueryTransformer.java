@@ -1,5 +1,6 @@
 package co.oleh.mongoreadsqlshell;
 
+import org.springframework.data.domain.Sort;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.stereotype.Component;
 
@@ -8,11 +9,12 @@ import java.util.regex.Pattern;
 
 @Component
 public class SqlToMongoQueryTransformer {
-    private static final Pattern NUMBER_INSIDE_STRING_PATTERN = Pattern.compile(".*\\s+([0-9]+)\\s+.*");
     private static final Pattern PROJECTION_PATTERN = Pattern.compile("^SELECT\\s+(.+)\\s+FROM\\s+.*");
-    private static final Pattern WHERE_PATTERN = Pattern.compile("\\s+WHERE\\s+(.+)\\s+");
     private static final Pattern LIMIT_PATTERN = Pattern.compile("\\s+LIMIT\\s+(.+)\\s+");
     private static final Pattern SKIP_PATTERN = Pattern.compile("\\s+SKIP\\s+(.+)\\s+");
+
+    private static final Pattern WHERE_PATTERN = Pattern.compile("\\s+WHERE\\s+(.+)\\s+(LIMIT|SKIP|;)");
+    private static final Pattern ORDER_BY_PATTERN = Pattern.compile("\\s+ORDER\\s+BY\\s+(.+)\\s+(LIMIT|SKIP|;)");
 
     public Query transform(String sqlQuery) {
         Query mongoQuery = new Query();
@@ -20,7 +22,7 @@ public class SqlToMongoQueryTransformer {
         mongoQuery = parseAndSetWhere(sqlQuery, mongoQuery);
         mongoQuery = parseAndSetSkipIfPassed(sqlQuery, mongoQuery);
         mongoQuery = parseAndSetLimitIfPassed(sqlQuery, mongoQuery);
-//        mongoQuery = setOrdering(sqlQuery, mongoQuery);
+        mongoQuery = parseAndSetOrderBy(sqlQuery, mongoQuery);
 
         return mongoQuery;
     }
@@ -31,6 +33,25 @@ public class SqlToMongoQueryTransformer {
         if (matcher.matches()) {
             String condition = matcher.group(1);
             // =, <>, >, >=, <, <= needs to be supported
+            throw new RuntimeException("Parsing where not yet implemented!");
+        }
+
+        return mongoQuery;
+    }
+
+    private Query parseAndSetOrderBy(String sqlQuery, Query mongoQuery) {
+        Matcher matcher = ORDER_BY_PATTERN.matcher(sqlQuery);
+
+        if (matcher.matches()) {
+            String orderBy = matcher.group(1);
+            String[] orderings = orderBy.split(",");
+            for (String ordering : orderings) {
+                String[] orderingComponents = ordering.trim().split("\\s+");
+                String property = orderingComponents[0].trim();
+                Sort.Direction direction = (orderingComponents.length > 1 && orderingComponents[1].trim().startsWith("DESC"))
+                        ? Sort.Direction.DESC : Sort.Direction.ASC;
+                mongoQuery.with(Sort.by(new Sort.Order(direction, property)));
+            }
         }
 
         return mongoQuery;

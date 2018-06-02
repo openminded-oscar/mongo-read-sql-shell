@@ -34,7 +34,6 @@ public class Main implements CommandLineRunner {
                 sqlQuery += " " + input;
                 if (input.trim().charAt(input.length() - 1) == ';') {
                     sqlQuery = (sqlQuery.substring(0, sqlQuery.length() - 1) + " ;").trim();
-                    System.out.println(sqlQuery);
                     Query query = sqlToMongo.transform(sqlQuery);
                     List<Object> users = repository.read(query, User.class);
                     System.out.println(users);

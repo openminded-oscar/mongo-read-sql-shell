@@ -8,72 +8,68 @@ import java.util.regex.Pattern;
 
 @Component
 public class SqlToMongoQueryTransformer {
-    private static final String SELECT = "SELECT";
-    private static final String FROM = "FROM";
-    private static final String SKIP = "SKIP";
-    private static final String LIMIT = "LIMIT";
-
     private static final Pattern NUMBER_INSIDE_STRING_PATTERN = Pattern.compile(".*\\s+([0-9]+)\\s+.*");
+    private static final Pattern PROJECTION_PATTERN = Pattern.compile("^SELECT\\s+(.+)\\s+FROM\\s+.*");
+    private static final Pattern WHERE_PATTERN = Pattern.compile("\\s+WHERE\\s+(.+)\\s+");
+    private static final Pattern LIMIT_PATTERN = Pattern.compile("\\s+LIMIT\\s+(.+)\\s+");
+    private static final Pattern SKIP_PATTERN = Pattern.compile("\\s+SKIP\\s+(.+)\\s+");
 
     public Query transform(String sqlQuery) {
         Query mongoQuery = new Query();
-        mongoQuery = setFields(sqlQuery, mongoQuery);
-        mongoQuery = setSkipIfPassed(sqlQuery, mongoQuery);
-        mongoQuery = setLimitIfPassed(sqlQuery, mongoQuery);
-        mongoQuery = setCondition(sqlQuery, mongoQuery);
-        mongoQuery = setOrdering(sqlQuery, mongoQuery);
+        mongoQuery = parseAndSetFields(sqlQuery, mongoQuery);
+        mongoQuery = parseAndSetWhere(sqlQuery, mongoQuery);
+        mongoQuery = parseAndSetSkipIfPassed(sqlQuery, mongoQuery);
+        mongoQuery = parseAndSetLimitIfPassed(sqlQuery, mongoQuery);
+//        mongoQuery = setOrdering(sqlQuery, mongoQuery);
 
         return mongoQuery;
     }
 
-    private Query setLimitIfPassed(String sqlQuery, Query mongoQuery) {
-        int limitIndex = sqlQuery.lastIndexOf(LIMIT);
-        if (limitIndex >= 0) {
-            // checking whether it's the keyword - not part of the field
-            if (!(Character.isLetterOrDigit(sqlQuery.charAt(limitIndex - 1)) ||
-                    Character.isLetterOrDigit(sqlQuery.charAt(limitIndex + LIMIT.length())))) {
-                String afterLimit = sqlQuery.substring(limitIndex + LIMIT.length());
-                Matcher m = NUMBER_INSIDE_STRING_PATTERN.matcher(afterLimit);
+    private Query parseAndSetWhere(String sqlQuery, Query mongoQuery) {
+        Matcher matcher = WHERE_PATTERN.matcher(sqlQuery);
 
-                if (m.matches()) {
-                    int limitAmount = Integer.valueOf(m.group(1));
-                    mongoQuery.limit(limitAmount);
-                }
-            }
+        if (matcher.matches()) {
+            String condition = matcher.group(1);
+            // =, <>, >, >=, <, <= needs to be supported
         }
 
         return mongoQuery;
     }
 
-    private Query setSkipIfPassed(String sqlQuery, Query mongoQuery) {
-        int skipIndex = sqlQuery.lastIndexOf(SKIP);
-        if (skipIndex >= 0) {
-            // checking whether it's the keyword - not part of the field
-            if (!(Character.isLetterOrDigit(sqlQuery.charAt(skipIndex - 1)) ||
-                    Character.isLetterOrDigit(sqlQuery.charAt(skipIndex + SKIP.length())))) {
-                String afterSkip = sqlQuery.substring(skipIndex + SKIP.length());
-                Matcher m = NUMBER_INSIDE_STRING_PATTERN.matcher(afterSkip);
+    private Query parseAndSetFields(String sqlQuery, Query mongoQuery) {
+        Matcher matcher = PROJECTION_PATTERN.matcher(sqlQuery);
 
-                if (m.matches()) {
-                    int skipAmount = Integer.valueOf(m.group(1));
-                    mongoQuery.skip(skipAmount);
+        if (matcher.matches()) {
+            String[] fields = matcher.group(1).split(",");
+
+            if (!((fields.length == 1) && (fields[0].equals("*")))) {
+                mongoQuery.fields().exclude("id");
+                for (String field : fields) {
+                    mongoQuery.fields().include(field.trim());
                 }
             }
+        } else {
+            throw new RuntimeException("Query parsing exception. Check the projection part");
         }
 
         return mongoQuery;
     }
 
-    private Query setFields(String sqlQuery, Query mongoQuery) {
-        String fieldsPart = sqlQuery.substring(sqlQuery.indexOf(SELECT) + SELECT.length(), sqlQuery.indexOf(FROM)).trim();
-        String[] fields = fieldsPart.split(",");
+    private Query parseAndSetLimitIfPassed(String sqlQuery, Query mongoQuery) {
+        Matcher matcher = LIMIT_PATTERN.matcher(sqlQuery);
+        if (matcher.matches()) {
+            int limitAmount = Integer.valueOf(matcher.group(1));
+            mongoQuery.limit(limitAmount);
+        }
 
-        if (!((fields.length == 1) && (fields[0].equals("*")))) {
-            // disable getting id by default
-            mongoQuery.fields().exclude("id");
-            for (String field : fields) {
-                mongoQuery.fields().include(field.trim());
-            }
+        return mongoQuery;
+    }
+
+    private Query parseAndSetSkipIfPassed(String sqlQuery, Query mongoQuery) {
+        Matcher matcher = SKIP_PATTERN.matcher(sqlQuery);
+        if (matcher.matches()) {
+            int skipAmount = Integer.valueOf(matcher.group(1));
+            mongoQuery.skip(skipAmount);
         }
 
         return mongoQuery;

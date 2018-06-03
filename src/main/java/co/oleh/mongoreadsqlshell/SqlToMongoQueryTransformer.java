@@ -1,6 +1,7 @@
 package co.oleh.mongoreadsqlshell;
 
 import org.springframework.data.domain.Sort;
+import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.stereotype.Component;
 
@@ -10,11 +11,15 @@ import java.util.regex.Pattern;
 @Component
 public class SqlToMongoQueryTransformer {
     private static final Pattern PROJECTION_PATTERN = Pattern.compile("^SELECT\\s+(.+)\\s+FROM\\s+.*");
+
     private static final Pattern LIMIT_PATTERN = Pattern.compile("\\s+LIMIT\\s+(.+)\\s+");
     private static final Pattern SKIP_PATTERN = Pattern.compile("\\s+SKIP\\s+(.+)\\s+");
 
-    private static final Pattern WHERE_PATTERN = Pattern.compile("\\s+WHERE\\s+(.+)\\s+(LIMIT|SKIP|;)");
     private static final Pattern ORDER_BY_PATTERN = Pattern.compile("\\s+ORDER\\s+BY\\s+(.+)\\s+(LIMIT|SKIP|;)");
+
+    private static final Pattern WHERE_PATTERN = Pattern.compile("\\s+WHERE\\s+(.+)\\s+(LIMIT|SKIP|;)");
+    private static final Pattern CONDITIONS_SPLIT_PATTERN = Pattern.compile("(.+)\\s+(AND|OR)\\s+(.+)");
+    private static final Pattern CONDITION_PATTERN = Pattern.compile("\\s*(.+)(=|<>|>|>=|<|<=)(.+)\\s*");
 
     public Query transform(String sqlQuery) {
         Query mongoQuery = new Query();
@@ -29,14 +34,62 @@ public class SqlToMongoQueryTransformer {
 
     private Query parseAndSetWhere(String sqlQuery, Query mongoQuery) {
         Matcher matcher = WHERE_PATTERN.matcher(sqlQuery);
-
         if (matcher.matches()) {
-            String condition = matcher.group(1);
-            // =, <>, >, >=, <, <= needs to be supported
-            throw new RuntimeException("Parsing where not yet implemented!");
+            mongoQuery.addCriteria(parseCriteria(matcher.group(1)));
         }
 
         return mongoQuery;
+    }
+
+    private Criteria parseCriteria(String sqlQuery) {
+        Matcher conditionsCombinationMatcher = CONDITIONS_SPLIT_PATTERN.matcher(sqlQuery);
+        Criteria criteria;
+        // if complex condition then recursion
+        if (conditionsCombinationMatcher.matches()) {
+            String lastCondition = conditionsCombinationMatcher.group(3).trim();
+            String criteriaSeparator = conditionsCombinationMatcher.group(2).trim();
+            String allConditionsBefore = conditionsCombinationMatcher.group(1).trim();
+
+            criteria = parseSingleCondition(lastCondition);
+
+            if(criteriaSeparator.equals("AND")){
+                criteria.andOperator(parseCriteria(allConditionsBefore));
+            } else if(criteriaSeparator.equals("OR")) {
+                criteria.orOperator(parseCriteria(allConditionsBefore));
+            }
+        } else {
+            criteria = parseSingleCondition(sqlQuery);
+        }
+
+        return criteria;
+    }
+
+    private Criteria parseSingleCondition(String condition) {
+        Matcher conditionMatcher = CONDITION_PATTERN.matcher(condition);
+
+        if (conditionMatcher.matches()) {
+            String operand1 = conditionMatcher.group(1).trim();
+            String operator = conditionMatcher.group(2).trim();
+            String operand2 = conditionMatcher.group(3).trim();
+            switch (operator) {
+                case "=":
+                    return Criteria.where(operand1).is(operand2);
+                case "<>":
+                    return Criteria.where(operand1).ne(operand2);
+                case ">":
+                    return Criteria.where(operand1).gt(operand2);
+                case ">=":
+                    return Criteria.where(operand1).gte(operand2);
+                case "<":
+                    return Criteria.where(operand1).lt(operand2);
+                case "<=":
+                    return Criteria.where(operand1).lte(operand2);
+            }
+        } else {
+            throw new RuntimeException(condition + " does not match to the condition pattern");
+        }
+
+        return null;
     }
 
     private Query parseAndSetOrderBy(String sqlQuery, Query mongoQuery) {

@@ -33,10 +33,15 @@ public class Main implements CommandLineRunner {
             } else {
                 sqlQuery += " " + input;
                 if (input.trim().charAt(input.length() - 1) == ';') {
-                    sqlQuery = (sqlQuery.substring(0, sqlQuery.length() - 1) + " ;").trim();
-                    Query query = sqlToMongo.transform(sqlQuery);
-                    List<Object> users = repository.read(query, User.class);
-                    System.out.println(users);
+                    try {
+                        sqlQuery = (sqlQuery.substring(0, sqlQuery.length() - 1) + " ;").trim();
+
+                        Query query = sqlToMongo.transform(sqlQuery);
+                        List<Object> users = repository.read(query, User.class);
+                        System.out.println(users);
+                    } catch (Exception e) {
+                        System.out.println(e);
+                    }
                     sqlQuery = "";
                 }
             }

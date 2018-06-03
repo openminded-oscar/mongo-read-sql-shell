@@ -2,6 +2,7 @@ package co.oleh.mongoreadsqlshell;
 
 import co.oleh.mongoreadsqlshell.entities.User;
 import co.oleh.mongoreadsqlshell.repositories.GenericDocumentRepository;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.data.mongodb.core.query.Query;
@@ -35,10 +36,11 @@ public class Main implements CommandLineRunner {
                 if (input.trim().charAt(input.length() - 1) == ';') {
                     try {
                         sqlQuery = (sqlQuery.substring(0, sqlQuery.length() - 1) + " ;").trim();
-
                         Query query = sqlToMongo.transform(sqlQuery);
+
                         List<Object> users = repository.read(query, User.class);
-                        System.out.println(users);
+
+                        System.out.println(new ObjectMapper().writeValueAsString(users));
                     } catch (Exception e) {
                         System.out.println(e);
                     }

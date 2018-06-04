@@ -8,6 +8,8 @@ import com.jayway.jsonpath.JsonPath;
 import com.jayway.jsonpath.Option;
 import org.junit.Test;
 
+import java.util.Arrays;
+
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 
@@ -28,7 +30,7 @@ public class OutputTest {
         user.setLname(lnameToSet);
         user.setId(idToSet);
 
-        String json = projector.project(user, User.class, "fname");
+        String json = projector.project(user, User.class, Arrays.asList("fname"));
         assertEquals(fnameToSet, JsonPath.using(jsonPathConfig).parse(json).read("$['fname']", String.class));
         assertNull(JsonPath.using(jsonPathConfig).parse(json).read("$['lname']", String.class));
         assertNull(JsonPath.using(jsonPathConfig).parse(json).read("$['id']", String.class));

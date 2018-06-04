@@ -1,4 +1,4 @@
-package co.oleh.mongoreadsqlshell.components;
+package co.oleh.mongoreadsqlshell;
 
 import lombok.Getter;
 import lombok.Setter;

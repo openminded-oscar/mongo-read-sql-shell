@@ -1,5 +1,6 @@
 package co.oleh.mongoreadsqlshell.components;
 
+import co.oleh.mongoreadsqlshell.SelectQuery;
 import co.oleh.mongoreadsqlshell.entities.Car;
 import co.oleh.mongoreadsqlshell.entities.RealtyObject;
 import co.oleh.mongoreadsqlshell.entities.User;

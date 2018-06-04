@@ -1,5 +1,6 @@
 package co.oleh.mongoreadsqlshell.components;
 
+import co.oleh.mongoreadsqlshell.SelectQuery;
 import co.oleh.mongoreadsqlshell.repositories.GenericDocumentRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Sort;

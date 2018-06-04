@@ -1,4 +1,4 @@
-package co.oleh.mongoreadsqlshell;
+package co.oleh.mongoreadsqlshell.components;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;

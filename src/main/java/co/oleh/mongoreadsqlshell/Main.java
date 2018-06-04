@@ -1,5 +1,8 @@
 package co.oleh.mongoreadsqlshell;
 
+import co.oleh.mongoreadsqlshell.components.ObjectToJsonStringProjector;
+import co.oleh.mongoreadsqlshell.components.SelectQuery;
+import co.oleh.mongoreadsqlshell.components.SelectQueryParser;
 import co.oleh.mongoreadsqlshell.entities.User;
 import co.oleh.mongoreadsqlshell.repositories.GenericDocumentRepository;
 import org.springframework.beans.factory.annotation.Autowired;

@@ -1,5 +1,6 @@
 package co.oleh.mongoreadsqlshell;
 
+import co.oleh.mongoreadsqlshell.components.ObjectToJsonStringProjector;
 import co.oleh.mongoreadsqlshell.entities.User;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.jayway.jsonpath.Configuration;

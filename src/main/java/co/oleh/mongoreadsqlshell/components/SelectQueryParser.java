@@ -1,4 +1,4 @@
-package co.oleh.mongoreadsqlshell;
+package co.oleh.mongoreadsqlshell.components;
 
 import co.oleh.mongoreadsqlshell.entities.User;
 import org.springframework.data.domain.Sort;

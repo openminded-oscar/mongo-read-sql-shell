@@ -2,25 +2,19 @@ package co.oleh.mongoreadsqlshell;
 
 import co.oleh.mongoreadsqlshell.entities.User;
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.jayway.jsonpath.Configuration;
 import com.jayway.jsonpath.JsonPath;
 import com.jayway.jsonpath.Option;
-import com.monitorjbl.json.JsonView;
-import com.monitorjbl.json.JsonViewModule;
 import org.junit.Test;
 
-import static com.monitorjbl.json.Match.match;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 
 public class OutputTest {
-    private ObjectMapper objectMapper = new ObjectMapper();
-    private Configuration config = Configuration.defaultConfiguration()
+    private ObjectToJsonStringProjector projector = new ObjectToJsonStringProjector();
+
+    private Configuration jsonPathConfig = Configuration.defaultConfiguration()
             .addOptions(Option.DEFAULT_PATH_LEAF_TO_NULL);
-    {
-        objectMapper.registerModule(new JsonViewModule());
-    }
 
     @Test
     public void testProjection() throws JsonProcessingException {
@@ -33,9 +27,9 @@ public class OutputTest {
         user.setLname(lnameToSet);
         user.setId(idToSet);
 
-        String json = objectMapper.writeValueAsString(JsonView.with(user).onClass(User.class, match().exclude("*").include("fname")));
-        assertEquals(fnameToSet, JsonPath.using(config).parse(json).read("$['fname']", String.class));
-        assertNull(JsonPath.using(config).parse(json).read("$['lname']", String.class));
-        assertNull(JsonPath.using(config).parse(json).read("$['id']", String.class));
+        String json = projector.project(user, User.class, "fname");
+        assertEquals(fnameToSet, JsonPath.using(jsonPathConfig).parse(json).read("$['fname']", String.class));
+        assertNull(JsonPath.using(jsonPathConfig).parse(json).read("$['lname']", String.class));
+        assertNull(JsonPath.using(jsonPathConfig).parse(json).read("$['id']", String.class));
     }
 }

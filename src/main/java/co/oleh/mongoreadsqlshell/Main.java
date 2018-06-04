@@ -18,6 +18,9 @@ public class Main implements CommandLineRunner {
     private SqlToMongoQueryTransformer sqlToMongo;
 
     @Autowired
+    private ObjectToJsonStringProjector projector;
+
+    @Autowired
     private GenericDocumentRepository repository;
 
     @Override
@@ -37,10 +40,10 @@ public class Main implements CommandLineRunner {
                     try {
                         sqlQuery = (sqlQuery.substring(0, sqlQuery.length() - 1) + " ;").trim();
                         Query query = sqlToMongo.transform(sqlQuery);
-
+                        
                         List<Object> users = repository.read(query, User.class);
 
-                        System.out.println(new ObjectMapper().writeValueAsString(users));
+                        System.out.println(projector.projectList(users, null, null));
                     } catch (Exception e) {
                         System.out.println(e);
                     }

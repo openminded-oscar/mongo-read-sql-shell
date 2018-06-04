@@ -1,5 +1,7 @@
 package co.oleh.mongoreadsqlshell.components;
 
+import co.oleh.mongoreadsqlshell.entities.Car;
+import co.oleh.mongoreadsqlshell.entities.RealtyObject;
 import co.oleh.mongoreadsqlshell.entities.User;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.mongodb.core.query.Criteria;
@@ -19,7 +21,8 @@ public class SelectQueryParser {
 
     private static final Pattern ORDER_BY_PATTERN = Pattern.compile("\\s+ORDER\\s+BY\\s+(.+)\\s+(LIMIT|SKIP|;)");
 
-    private static final Pattern WHERE_PATTERN = Pattern.compile("\\s+WHERE\\s+(.+)\\s+(LIMIT|SKIP|;)");
+    private static final Pattern FROM_PATTERN = Pattern.compile("\\s+FROM\\s+(.+)\\s+((ORDER(\\s+)BY)|WHERE|LIMIT|SKIP|;)");
+    private static final Pattern WHERE_PATTERN = Pattern.compile("\\s+WHERE\\s+(.+)\\s+((ORDER(\\s+)BY)|LIMIT|SKIP|;)");
     private static final Pattern CONDITIONS_SPLIT_PATTERN = Pattern.compile("(.+)\\s+(AND|OR)\\s+(.+)");
     private static final Pattern CONDITION_PATTERN = Pattern.compile("\\s*(.+)(=|<>|>|>=|<|<=)(.+)\\s*");
 
@@ -38,7 +41,23 @@ public class SelectQueryParser {
     }
 
     private Class parseFrom(String sqlString) {
-        return User.class;
+        Matcher matcher = WHERE_PATTERN.matcher(sqlString);
+
+        if (matcher.matches()) {
+            String type = matcher.group(1).trim();
+            switch (type) {
+                case "USER":
+                    return User.class;
+                case "REALTY":
+                    return RealtyObject.class;
+                case "CAR":
+                    return Car.class;
+                default:
+                    throw new RuntimeException("Type not supported");
+            }
+        }
+
+        return null;
     }
 
     private Criteria parseWhere(String sqlQuery) {

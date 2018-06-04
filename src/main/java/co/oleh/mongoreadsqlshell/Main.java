@@ -1,9 +1,9 @@
 package co.oleh.mongoreadsqlshell;
 
+import co.oleh.mongoreadsqlshell.components.MongoReader;
 import co.oleh.mongoreadsqlshell.components.ObjectToJsonStringProjector;
 import co.oleh.mongoreadsqlshell.components.SelectQuery;
 import co.oleh.mongoreadsqlshell.components.SelectQueryParser;
-import co.oleh.mongoreadsqlshell.entities.User;
 import co.oleh.mongoreadsqlshell.repositories.GenericDocumentRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
@@ -23,7 +23,7 @@ public class Main implements CommandLineRunner {
     private ObjectToJsonStringProjector projector;
 
     @Autowired
-    private GenericDocumentRepository repository;
+    private MongoReader mongoReader;
 
     @Override
     public void run(String... args) throws Exception {
@@ -42,11 +42,8 @@ public class Main implements CommandLineRunner {
                     try {
                         sqlQuery = (sqlQuery.substring(0, sqlQuery.length() - 1) + " ;").trim();
                         SelectQuery parsedQuery = parser.parse(sqlQuery);
-
-                        Query query = null;
-                        List<Object> users = repository.read(query, User.class);
-
-                        System.out.println(projector.projectList(users, parsedQuery.getFrom(), parsedQuery.getProjection()));
+                        List<Object> objects = mongoReader.readBySelectQuery(parsedQuery);
+                        System.out.println(projector.projectList(objects, parsedQuery.getFrom(), parsedQuery.getProjection()));
                     } catch (Exception e) {
                         System.out.println(e);
                     }

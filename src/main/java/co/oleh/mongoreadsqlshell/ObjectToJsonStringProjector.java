@@ -21,14 +21,14 @@ public class ObjectToJsonStringProjector {
     }
 
 
-    public String project(Object object, Class clazz, String... fields) throws JsonProcessingException {
-        Match match = match().exclude("*").include(fields);
+    public String project(Object object, Class clazz, List<String> fields) throws JsonProcessingException {
+        Match match = match().exclude("*").include(fields.toArray(new String[fields.size()]));
         JsonView jsonView = JsonView.with(object).onClass(clazz, match);
 
         return objectMapper.writeValueAsString(jsonView);
     }
 
-    public String projectList(List<? extends Object> objects, Class clazz, String... fields) throws JsonProcessingException {
+    public String projectList(List<? extends Object> objects, Class clazz, List<String> fields) throws JsonProcessingException {
         String collectionProjection = "";
 
         for (Object o : objects) {

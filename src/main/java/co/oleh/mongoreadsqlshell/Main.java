@@ -2,7 +2,6 @@ package co.oleh.mongoreadsqlshell;
 
 import co.oleh.mongoreadsqlshell.entities.User;
 import co.oleh.mongoreadsqlshell.repositories.GenericDocumentRepository;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.data.mongodb.core.query.Query;
@@ -15,7 +14,7 @@ import java.util.List;
 @Component
 public class Main implements CommandLineRunner {
     @Autowired
-    private SqlToMongoQueryTransformer sqlToMongo;
+    private SelectQueryParser parser;
 
     @Autowired
     private ObjectToJsonStringProjector projector;
@@ -39,11 +38,12 @@ public class Main implements CommandLineRunner {
                 if (input.trim().charAt(input.length() - 1) == ';') {
                     try {
                         sqlQuery = (sqlQuery.substring(0, sqlQuery.length() - 1) + " ;").trim();
-                        Query query = sqlToMongo.transform(sqlQuery);
-                        
+                        SelectQuery parsedQuery = parser.parse(sqlQuery);
+
+                        Query query = null;
                         List<Object> users = repository.read(query, User.class);
 
-                        System.out.println(projector.projectList(users, null, null));
+                        System.out.println(projector.projectList(users, parsedQuery.getFrom(), parsedQuery.getProjection()));
                     } catch (Exception e) {
                         System.out.println(e);
                     }

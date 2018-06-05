@@ -16,13 +16,13 @@ import java.util.regex.Pattern;
 public class SelectQueryParser {
     private static final Pattern PROJECTION_PATTERN = Pattern.compile("^SELECT\\s+(.+)\\s+FROM\\s+.*");
 
-    private static final Pattern LIMIT_PATTERN = Pattern.compile("\\s+LIMIT\\s+(.+)\\s+");
-    private static final Pattern SKIP_PATTERN = Pattern.compile("\\s+SKIP\\s+(.+)\\s+");
+    private static final Pattern LIMIT_PATTERN = Pattern.compile(".*\\s+LIMIT\\s+([0-9]+)\\s+.*");
+    private static final Pattern SKIP_PATTERN = Pattern.compile(".*\\s+SKIP\\s+([0-9]+)\\s+.*");
 
-    private static final Pattern ORDER_BY_PATTERN = Pattern.compile("\\s+ORDER\\s+BY\\s+(.+)\\s+(LIMIT|SKIP|;)");
+    private static final Pattern ORDER_BY_PATTERN = Pattern.compile(".*\\s+ORDER\\s+BY\\s+(.+)\\s+(LIMIT.*|SKIP.*|;)");
 
-    private static final Pattern FROM_PATTERN = Pattern.compile("\\s+FROM\\s+(.+)\\s+((ORDER(\\s+)BY)|WHERE|LIMIT|SKIP|;)");
-    private static final Pattern WHERE_PATTERN = Pattern.compile("\\s+WHERE\\s+(.+)\\s+((ORDER(\\s+)BY)|LIMIT|SKIP|;)");
+    private static final Pattern FROM_PATTERN = Pattern.compile(".*\\s+FROM\\s+([a-zA-Z0-9]+)\\s+((ORDER(\\s+)BY.*)|WHERE.*|LIMIT.*|SKIP.*|;.*)");
+    private static final Pattern WHERE_PATTERN = Pattern.compile(".*\\s+WHERE\\s+(.+?)\\s+((ORDER(\\s+)BY.*)|LIMIT.*|SKIP.*|;)");
     private static final Pattern CONDITIONS_SPLIT_PATTERN = Pattern.compile("(.+)\\s+(AND|OR)\\s+(.+)");
     private static final Pattern CONDITION_PATTERN = Pattern.compile("\\s*(.+)(=|<>|>|>=|<|<=)(.+)\\s*");
 
@@ -41,7 +41,7 @@ public class SelectQueryParser {
     }
 
     private Class parseFrom(String sqlString) {
-        Matcher matcher = WHERE_PATTERN.matcher(sqlString);
+        Matcher matcher = FROM_PATTERN.matcher(sqlString);
 
         if (matcher.matches()) {
             String type = matcher.group(1).trim();
@@ -102,6 +102,8 @@ public class SelectQueryParser {
             String operand1 = conditionMatcher.group(1).trim();
             String operator = conditionMatcher.group(2).trim();
             String operand2 = conditionMatcher.group(3).trim();
+            // strip off quotation
+            operand2 = operand2.replaceAll("^\"|\"$", "");
             switch (operator) {
                 case "=":
                     return Criteria.where(operand1).is(operand2);

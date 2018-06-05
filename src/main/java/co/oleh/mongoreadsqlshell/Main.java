@@ -3,9 +3,10 @@ package co.oleh.mongoreadsqlshell;
 import co.oleh.mongoreadsqlshell.components.MongoReader;
 import co.oleh.mongoreadsqlshell.components.ObjectToJsonStringProjector;
 import co.oleh.mongoreadsqlshell.components.SelectQueryParser;
-import co.oleh.mongoreadsqlshell.entities.Car;
-import co.oleh.mongoreadsqlshell.entities.RealtyObject;
-import co.oleh.mongoreadsqlshell.entities.User;
+import co.oleh.mongoreadsqlshell.components.SelectQuery;
+import co.oleh.mongoreadsqlshell.models.entities.Car;
+import co.oleh.mongoreadsqlshell.models.entities.RealtyObject;
+import co.oleh.mongoreadsqlshell.models.entities.User;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.stereotype.Component;
@@ -68,7 +69,7 @@ public class Main implements CommandLineRunner {
 
         System.out.println("Supported entities list:");
         for (Class clazz : supportedClasses) {
-            System.out.print("Class " + clazz.getSimpleName() + " - ");
+            System.out.print("Class " + clazz.getSimpleName().toLowerCase() + " - ");
             System.out.println(Arrays.asList(clazz.getDeclaredFields())
                     .stream()
                     .map(Field::getName)

@@ -1,9 +1,8 @@
 package co.oleh.mongoreadsqlshell.components;
 
-import co.oleh.mongoreadsqlshell.SelectQuery;
-import co.oleh.mongoreadsqlshell.entities.Car;
-import co.oleh.mongoreadsqlshell.entities.RealtyObject;
-import co.oleh.mongoreadsqlshell.entities.User;
+import co.oleh.mongoreadsqlshell.models.entities.Car;
+import co.oleh.mongoreadsqlshell.models.entities.RealtyObject;
+import co.oleh.mongoreadsqlshell.models.entities.User;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.stereotype.Component;

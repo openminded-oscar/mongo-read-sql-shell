@@ -46,10 +46,13 @@ public class SelectQueryParser {
         if (matcher.matches()) {
             String type = matcher.group(1).trim();
             switch (type) {
+                case "user":
                 case "USER":
                     return User.class;
+                case "realty":
                 case "REALTY":
                     return RealtyObject.class;
+                case "car":
                 case "CAR":
                     return Car.class;
                 default:

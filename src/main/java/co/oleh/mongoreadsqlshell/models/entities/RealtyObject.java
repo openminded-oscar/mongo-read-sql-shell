@@ -11,6 +11,7 @@ import java.math.BigDecimal;
 @Getter
 @Setter
 public class RealtyObject {
+    private String id;
     private Double totalArea;
     private Double livingArea;
     private BigDecimal price;

@@ -26,6 +26,9 @@ public class MongoReader {
         if (!(fields.size() == 1 && fields.get(0).equals("*"))) {
             mongoQuery.fields().exclude("id");
             for (String field : fields) {
+                if (field.endsWith(".*")) {
+                    field = field.substring(0, field.length() - 2);
+                }
                 mongoQuery.fields().include(field);
             }
         }

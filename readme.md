@@ -9,7 +9,7 @@ SELECT `Projections` FROM `Target`
 [LIMIT `MaxRecords`]
 
 <h3>Features:</h3>
-- support of projections and *;
+- support of projections, * and field.* - for embedded fields;
 - multiple ordering;
 - complex condition separated by AND|OR;
 - support of LIMIT and SKIP.

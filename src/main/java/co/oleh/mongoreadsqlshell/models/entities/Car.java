@@ -14,5 +14,4 @@ public class Car {
     private String registrationCountry;
     private String countryNumber;
     private String model;
-    private LocalDate manufacturingDate;
 }

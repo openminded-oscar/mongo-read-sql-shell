@@ -25,7 +25,7 @@ public class ObjectToJsonStringProjector {
         Match match = match().exclude("*").include(fields.toArray(new String[fields.size()]));
         JsonView jsonView = JsonView.with(object).onClass(clazz, match);
 
-        return objectMapper.writeValueAsString(jsonView);
+        return objectMapper.writerWithDefaultPrettyPrinter().writeValueAsString(jsonView);
     }
 
     public String projectList(List<? extends Object> objects, Class clazz, List<String> fields) throws JsonProcessingException {

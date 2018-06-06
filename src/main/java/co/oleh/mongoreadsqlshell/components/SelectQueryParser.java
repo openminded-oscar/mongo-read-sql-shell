@@ -49,8 +49,9 @@ public class SelectQueryParser {
                 case "user":
                 case "USER":
                     return User.class;
-                case "realty":
-                case "REALTY":
+                case "realtyobject":
+                case "realtyObject":
+                case "REALTYOBJECT":
                     return RealtyObject.class;
                 case "car":
                 case "CAR":

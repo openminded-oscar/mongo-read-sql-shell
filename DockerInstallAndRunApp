@@ -1,0 +1,7 @@
+mvn clean package
+docker run --name mongo-image -d mongo:3.6.5
+docker cp test-db-dump mongo-image:/home
+docker exec -i mongo-image  mongorestore -v --db realty /home/test-db-dump
+docker exec -i mongo-image rm -rf /home/test-db-dump
+docker build . -t mongo-read-sql-shell
+docker run -i --link mongo-image:27017 mongo-read-sql-shell

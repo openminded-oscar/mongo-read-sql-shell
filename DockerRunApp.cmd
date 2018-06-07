@@ -1,0 +1,1 @@
+call docker run -i -t --link mongo-image:27017 mongo-read-sql-shell

@@ -35,4 +35,15 @@ Using Spring Data Mongo repositories we would have to declare methods for all po
 - db is connecting to mongo on `default port (27017)` and `realty` database - as set in `application.properties` file. Use next properties to override default configuration: `spring.data.mongodb.host, spring.data.mongodb.port, spring.data.mongodb.password, spring.data.mongodb.username, spring.data.mongodb.uri`.
 - to test application you can use test database dump, provided in realty-db-to-test project folder - using `mongorestore --db realty <path-to-dump>` command;
 - you have to use upper case for keywords and same case for fields as application will output at beginning (typically camelcase);
-- use `;` to end query.
+- use `;` to end query;
+- <h5>To run app in Docker run `DockerRunApp` script, to install and run app in Docker - `DockerInstallAndRunApp`</h5>.
+
+<h3>DockerInstallAndRunApp script explanation:</h3>
+0) `mvn clean package` - to build jar file that will be built as image in 2);
+1) `docker run --name mongo-image -d mongo:3.6.5` - starts mongo in separate container (you have to pull mongo image before);
+2) [optional - populate db from dump folder] 
+2.1) `docker cp test-db-dump mongo-image:/home` from project root directory;
+2.2) `docker exec -it mongo-image  mongorestore -v --db realty /home/test-db-dump`;
+2.3) `docker exec -it mongo-image rm -rf /home/test-db-dump`;
+3) `docker build . -t mongo-read-sql-shell` - builds application image and activates docker profile;
+4) `docker run -i -t --link mongo-image:27017 mongo-read-sql-shell` - launches application container in interactive mode (stdout and stdin enabled).
